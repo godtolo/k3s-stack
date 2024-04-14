@@ -1,73 +1,65 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
-  name: kube-prometheus-1710214099-kube-state-metrics
+  name: kube-prometheus-1710214099-node-exporter
   namespace: kube-monitoring
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: kube-prometheus-1710214099
-      app.kubernetes.io/name: kube-state-metrics
+      app.kubernetes.io/name: node-exporter
   template:
     metadata:
       creationTimestamp: null
       labels:
         app.kubernetes.io/instance: kube-prometheus-1710214099
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: kube-state-metrics
-        app.kubernetes.io/version: 2.10.1
-        helm.sh/chart: kube-state-metrics-3.16.1
+        app.kubernetes.io/name: node-exporter
+        app.kubernetes.io/version: 1.7.0
+        helm.sh/chart: node-exporter-3.16.0
     spec:
       volumes:
       - name: empty-dir
         emptyDir: {}
+      - name: proc
+        hostPath:
+          path: /proc
+          type: ''
+      - name: sys
+        hostPath:
+          path: /sys
+          type: ''
       containers:
-      - name: kube-state-metrics
-        image: docker.io/bitnami/kube-state-metrics:2.10.1-debian-12-r16
+      - name: node-exporter
+        image: docker.io/bitnami/node-exporter:1.7.0-debian-12-r12
         args:
-        - '--resources=certificatesigningrequests'
-        - '--resources=configmaps'
-        - '--resources=cronjobs'
-        - '--resources=daemonsets'
-        - '--resources=deployments'
-        - '--resources=endpoints'
-        - '--resources=horizontalpodautoscalers'
-        - '--resources=ingresses'
-        - '--resources=jobs'
-        - '--resources=leases'
-        - '--resources=limitranges'
-        - '--resources=mutatingwebhookconfigurations'
-        - '--resources=namespaces'
-        - '--resources=networkpolicies'
-        - '--resources=nodes'
-        - '--resources=persistentvolumeclaims'
-        - '--resources=persistentvolumes'
-        - '--resources=poddisruptionbudgets'
-        - '--resources=pods'
-        - '--resources=replicasets'
-        - '--resources=replicationcontrollers'
-        - '--resources=resourcequotas'
-        - '--resources=secrets'
-        - '--resources=services'
-        - '--resources=statefulsets'
-        - '--resources=storageclasses'
-        - '--resources=volumeattachments'
-        - '--port=8080'
-        - '--telemetry-port=8081'
+        - '--path.procfs=/host/proc'
+        - '--path.sysfs=/host/sys'
+        - '--web.listen-address=0.0.0.0:9200'
+        - >-
+          --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
+        - >-
+          --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
         ports:
-        - name: http
-          containerPort: 8080
+        - name: metrics
+          hostPort: 9200
+          containerPort: 9200
           protocol: TCP
         resources: {}
         volumeMounts:
         - name: empty-dir
           mountPath: /tmp
           subPath: tmp-dir
+        - name: proc
+          readOnly: true
+          mountPath: /host/proc
+        - name: sys
+          readOnly: true
+          mountPath: /host/sys
         livenessProbe:
           httpGet:
-            path: /healthz
-            port: http
+            path: /
+            port: metrics
             scheme: HTTP
           initialDelaySeconds: 120
           timeoutSeconds: 5
@@ -77,7 +69,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: http
+            port: metrics
             scheme: HTTP
           initialDelaySeconds: 30
           timeoutSeconds: 5
@@ -102,9 +94,11 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
-      serviceAccountName: kube-prometheus-1710214099-kube-state-metrics
-      serviceAccount: kube-prometheus-1710214099-kube-state-metrics
-      automountServiceAccountToken: true
+      serviceAccountName: kube-prometheus-1710214099-node-exporter
+      serviceAccount: kube-prometheus-1710214099-node-exporter
+      automountServiceAccountToken: false
+      hostNetwork: true
+      hostPID: true
       securityContext:
         fsGroup: 1001
         fsGroupChangePolicy: Always
@@ -116,13 +110,12 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/instance: kube-prometheus-1710214099
-                  app.kubernetes.io/name: kube-state-metrics
+                  app.kubernetes.io/name: node-exporter
               topologyKey: kubernetes.io/hostname
       schedulerName: default-scheduler
-  strategy:
+  updateStrategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
+      maxUnavailable: 1
+      maxSurge: 0
   revisionHistoryLimit: 10
-  progressDeadlineSeconds: 600

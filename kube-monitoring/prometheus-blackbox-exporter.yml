@@ -1,37 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kube-prometheus-1709442776-blackbox-exporter
-  namespace: monitoring
+  name: kube-prometheus-1710214099-blackbox-exporter
+  namespace: kube-monitoring
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/component: blackbox-exporter
-      app.kubernetes.io/instance: kube-prometheus-1709442776
+      app.kubernetes.io/instance: kube-prometheus-1710214099
       app.kubernetes.io/name: kube-prometheus
   template:
     metadata:
       creationTimestamp: null
       labels:
         app.kubernetes.io/component: blackbox-exporter
-        app.kubernetes.io/instance: kube-prometheus-1709442776
+        app.kubernetes.io/instance: kube-prometheus-1710214099
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: kube-prometheus
-        helm.sh/chart: kube-prometheus-8.1.10
+        app.kubernetes.io/version: 0.72.0
+        helm.sh/chart: kube-prometheus-8.30.1
       annotations:
-        checksum/config: 1abc826a43001a6332ef3fb9d3f7162ee180eb97566dac5d2e75987f984a800a
-        linkerd.io/inject: enabled
+        checksum/config: 3d9f30ba3266375f1f4478707b1ff6d0007e765583db7dac6c28272e70b0152f
     spec:
       volumes:
+      - name: empty-dir
+        emptyDir: {}
       - name: blackbox-exporter-config
         configMap:
-          name: kube-prometheus-1709442776-blackbox-exporter
+          name: kube-prometheus-1710214099-blackbox-exporter
           defaultMode: 420
       containers:
       - name: blackbox-exporter
-        image: >-
-          marketplace.azurecr.io/bitnami/blackbox-exporter:0.22.0-debian-11-r22
+        image: docker.io/bitnami/blackbox-exporter:0.24.0-debian-12-r25
         args:
         - '--config.file=/bitnami/blackbox-exporter/conf/config.yml'
         - '--web.listen-address=:19115'
@@ -43,6 +44,9 @@ spec:
         volumeMounts:
         - name: blackbox-exporter-config
           mountPath: /bitnami/blackbox-exporter/conf
+        - name: empty-dir
+          mountPath: /tmp
+          subPath: tmp-dir
         livenessProbe:
           httpGet:
             path: /
@@ -67,15 +71,26 @@ spec:
         terminationMessagePolicy: File
         imagePullPolicy: IfNotPresent
         securityContext:
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
           runAsUser: 1001
+          runAsGroup: 0
           runAsNonRoot: true
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false
+          seccompProfile:
+            type: RuntimeDefault
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
-      serviceAccountName: kube-prometheus-1709442776-blackbox-exporter
-      serviceAccount: kube-prometheus-1709442776-blackbox-exporter
+      serviceAccountName: kube-prometheus-1710214099-blackbox-exporter
+      serviceAccount: kube-prometheus-1710214099-blackbox-exporter
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 1001
+        fsGroupChangePolicy: Always
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -84,10 +99,8 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/component: blackbox-exporter
-                  app.kubernetes.io/instance: kube-prometheus-1709442776
+                  app.kubernetes.io/instance: kube-prometheus-1710214099
                   app.kubernetes.io/name: kube-prometheus
-              namespaces:
-              - monitoring
               topologyKey: kubernetes.io/hostname
       schedulerName: default-scheduler
   strategy:

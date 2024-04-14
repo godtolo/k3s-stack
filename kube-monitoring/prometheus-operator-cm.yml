@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-prometheus-1710214099-operator
+  namespace: kube-monitoring
+data:
+  prometheus-config-reloader: docker.io/bitnami/prometheus-operator:0.72.0-debian-12-r1
