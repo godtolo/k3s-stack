@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   source:
-    path: monitoring-k3s/manifest
+    path: kube-monitoring
     repoURL: https://github.com/godtolo/k3s-stack.git
     targetRevision: HEAD
     directory:
