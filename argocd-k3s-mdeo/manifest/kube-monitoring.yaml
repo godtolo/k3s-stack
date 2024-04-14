@@ -1,18 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: linkerd
+  name: kube-monitoring
   namespace: argocd
 spec:
   source:
-    path: manifest
-    repoURL: https://github.com/godtolo/linkerd.git
+    path: monitoring-k3s/manifest
+    repoURL: https://github.com/godtolo/k3s-stack.git
     targetRevision: HEAD
     directory:
       recurse: true
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: linkerd-poc
+    namespace: kube-monitoring
   project: default
   syncPolicy:
     syncOptions:
