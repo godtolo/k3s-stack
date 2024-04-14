@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: godtolo-web-ui
+  name: godtolo-web-prod
   namespace: argocd
 spec:
   source:
@@ -16,4 +16,4 @@ spec:
   project: default
   syncPolicy:
     syncOptions:
-      - CreateNamespace=true
+    - CreateNamespace=true
