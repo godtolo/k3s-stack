@@ -1,0 +1,14 @@
+project: default
+source:
+  repoURL: 'https://github.com/godtolo/linktree_infra.git'
+  path: manifest
+  targetRevision: HEAD
+  directory:
+    recurse: true
+    jsonnet: {}
+destination:
+  server: 'https://kubernetes.default.svc'
+  namespace: linktree-web-prod
+syncPolicy:
+  syncOptions:
+  - CreateNamespace=true
