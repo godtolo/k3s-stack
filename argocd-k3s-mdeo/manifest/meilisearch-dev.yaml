@@ -7,7 +7,7 @@ metadata:
   labels:
     argocd.argoproj.io/instance: argocd-k3s-mdeo
   name: meilisearch-dev
-  namespace: argocd-k3s-mdeo
+  namespace: argocd
 project: default
 source:
   helm:

@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: uptime-kuma
+  namespace: argocd
 spec:
   destination:
     namespace: uptime-kuma
@@ -12,4 +13,6 @@ spec:
     targetRevision: HEAD
   sources: []
   project: default
-
+syncPolicy:
+  syncOptions:
+  - CreateNamespace=true
