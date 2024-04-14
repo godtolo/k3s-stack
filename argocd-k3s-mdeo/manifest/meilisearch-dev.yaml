@@ -28,6 +28,3 @@ spec:
     repoURL: 'https://github.com/meilisearch/meilisearch-kubernetes.git'
     targetRevision: HEAD
   sources: []
-syncPolicy:
-  syncOptions:
-  - CreateNamespace=true
