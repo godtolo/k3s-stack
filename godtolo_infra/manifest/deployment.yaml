@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: godtolo-web-ui
+  template:
+    metadata:
+      labels:
+        app: godtolo-web-ui
+    spec:
+      containers:
+        - name: godtolo-web-ui
+          image: godtolo/godtolo-web:latest
+          ports:
+            - containerPort: 80

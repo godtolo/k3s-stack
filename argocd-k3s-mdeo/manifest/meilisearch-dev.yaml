@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: meilisearch-dev
+spec:
+  destination:
+    name: ''
+    namespace: meilisearch-dev
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: charts/meilisearch
+    repoURL: 'https://github.com/meilisearch/meilisearch-kubernetes.git'
+    targetRevision: HEAD
+  sources: []
+  project: default
+project: default
+source:
+  repoURL: 'https://github.com/meilisearch/meilisearch-kubernetes.git'
+  path: charts/meilisearch
+  targetRevision: meilisearch-0.4.0
+  helm:
+    parameters:
+      - name: auth.existingMasterKeySecret
+    values: |
+
+      persistence:
+        # -- Enable persistence using PVC
+        enabled: true
+        # -- PVC Access Mode
+        accessMode: ReadWriteOnce
+        storageClass: "local-path"
+        storageClassName: "local-path"
+        volumeMode: Filesystem
+
+        ## Data Persistent Volume existing claim name
+        ## If defined, PVC must be created manually before volume will be bound
+        # -- Existing PVC
+        existingClaim: ""
+        # -- PVC Storage Request
+        size: 2Gi
+        # -- Additional annotations for PVC
+        annotations: {}
+        volume:
+          name: meilisearch
+          mountPath: /meili_data
+
+      # Environment loaded into the configMap
+      environment:
+        # -- Deactivates analytics
+        MEILI_NO_ANALYTICS: true
+        # -- Sets the environment. Either **production** or **development**
+        MEILI_ENV: production
+
+      # -- Resources allocation (Requests and Limits)
+      resources: 
+        limits:
+          cpu: 100m
+          memory: 128Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+      service:
+        port: 7700
+        type: NodePort
+destination:
+  server: 'https://kubernetes.default.svc'
+  namespace: meilisearch
+syncPolicy:
+  syncOptions:
+    - CreateNamespace=true
+

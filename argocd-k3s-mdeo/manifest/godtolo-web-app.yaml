@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: godtolo-web-ui
+  namespace: argocd
+spec:
+  source:
+    path: manifest
+    repoURL: https://github.com/godtolo/godtolo_infra.git
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: godtolo-web-prod
+  project: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

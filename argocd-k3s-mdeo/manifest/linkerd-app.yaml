@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd
+  namespace: argocd
+spec:
+  source:
+    path: manifest
+    repoURL: https://github.com/godtolo/linkerd.git
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: linkerd
+  project: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
