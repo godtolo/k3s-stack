@@ -13,6 +13,6 @@ spec:
     targetRevision: HEAD
   sources: []
   project: default
-  syncPolicy:
-    syncOptions:
-    - CreateNamespace=true
+syncPolicy:
+  syncOptions:
+  - CreateNamespace=true
