@@ -4,15 +4,16 @@ metadata:
   name: linktree-web-prod
   namespace: argocd
 spec:
-  destination:
-    namespace: linktree-web-prod
-    server: 'https://kubernetes.default.svc'
   source:
     path: manifest
     repoURL: 'https://github.com/godtolo/linktree_infra.git'
     targetRevision: HEAD
-  sources: []
+    directory:
+      recurse: true
+  destination:
+    namespace: linktree-web-prod
+    server: 'https://kubernetes.default.svc'
   project: default
-syncPolicy:
-  syncOptions:
-  - CreateNamespace=true
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
